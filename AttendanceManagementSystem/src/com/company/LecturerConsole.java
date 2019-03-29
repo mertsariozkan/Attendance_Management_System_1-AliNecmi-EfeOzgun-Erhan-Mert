@@ -152,8 +152,8 @@ public class LecturerConsole extends JFrame {
         naButton.addActionListener(e -> {
             rightPanel.removeAll();
             String[][] naStudents = {
-                    { "20150601041", "Mert Sarıözkan", "20" },
-                    { "20150601042", "Erhan Şahan", "18" }
+                    { "20150601041", "Mert Sariozkan", "20" },
+                    { "20150601042", "Erhan Sahan", "18" }
             };
             String[] columnNames = { "Student Id", "Student Name", "Absenteeism" };
             JTable naTable = new JTable(naStudents, columnNames);
