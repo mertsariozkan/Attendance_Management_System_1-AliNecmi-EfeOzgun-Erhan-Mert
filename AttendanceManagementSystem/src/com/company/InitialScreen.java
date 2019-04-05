@@ -3,6 +3,13 @@ package com.company;
 import javax.swing.*;
 import java.awt.*;
 
+/**
+ * This class contains UI for initial screen
+ * which user will be able to select what type
+ * of user he/she is
+ * **/
+
+
 public class InitialScreen extends JFrame {
 
     public InitialScreen() {

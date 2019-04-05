@@ -10,6 +10,13 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
+
+/**
+ * This class contains UI for student console
+ *
+ * **/
+
+
 public class StudentConsole extends JFrame {
     public StudentConsole() {
         setSize(900,500);
