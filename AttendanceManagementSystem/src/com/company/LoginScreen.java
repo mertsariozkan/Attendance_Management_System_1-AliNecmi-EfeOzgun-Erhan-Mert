@@ -30,6 +30,8 @@ public class LoginScreen extends JFrame {
             switch (userType) {
                 case "Student":
                     //Student login
+                	setVisible(false);
+                	new StudentConsole();
                     break;
                 case "Lecturer":
                     //Lecturer login
@@ -39,6 +41,7 @@ public class LoginScreen extends JFrame {
                 case "Admin":
                     //Admin login
                     break;
+                 
             }
         });
 
