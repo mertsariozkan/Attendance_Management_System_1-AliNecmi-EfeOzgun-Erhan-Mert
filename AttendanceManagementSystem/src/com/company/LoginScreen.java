@@ -2,6 +2,20 @@ package com.company;
 
 import javax.swing.*;
 
+
+/**
+ * This class contains UI for login screen
+ * which user enters his ID and password informations.
+ * In addition, user type is received in constructor,
+ * so this user type info will be used when searching Users database.
+ *
+ * Later, we will create database connection for required functionality.
+ *
+ *
+ * **/
+
+
+
 public class LoginScreen extends JFrame {
 
     public LoginScreen(String userType) {

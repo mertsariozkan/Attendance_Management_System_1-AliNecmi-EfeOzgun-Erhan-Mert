@@ -7,6 +7,11 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
+/**
+ * This class contains UI for lecturer console
+ *
+ * **/
+
 public class LecturerConsole extends JFrame {
     public LecturerConsole() {
         setSize(900,500);
@@ -14,17 +19,21 @@ public class LecturerConsole extends JFrame {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLayout(null);
 
+
+        // Left of frame is set for sections that current lecturer teaches, and buttons for repaint right of frame.
         JPanel leftPanel = new JPanel();
         leftPanel.setBounds(0,0,getWidth()/3,getHeight());
         leftPanel.setLayout(null);
         leftPanel.setBorder(BorderFactory.createLineBorder(Color.black,3));
 
+        //Right of frame
         JPanel rightPanel = new JPanel();
         rightPanel.setBounds(leftPanel.getWidth(),0,getWidth()*2/3,getHeight());
         rightPanel.setLayout(null);
         rightPanel.setBorder(BorderFactory.createLineBorder(Color.black,3));
 
 
+        //Dummy data
         ArrayList<String> sections = new ArrayList<>();
         sections.add("SE311");
         sections.add("SE375");
@@ -36,6 +45,7 @@ public class LecturerConsole extends JFrame {
         list.setBounds(0,0,leftPanel.getWidth(),leftPanel.getHeight()/2);
         list.setBorder(BorderFactory.createLineBorder(Color.black,3));
 
+        //New Attendance button for taking current date's attendance
         JButton newAttendanceButton = new JButton();
         newAttendanceButton.setIcon(new ImageIcon("icons/pencil.png"));
         newAttendanceButton.setBounds(50,400,30,30);
@@ -68,6 +78,8 @@ public class LecturerConsole extends JFrame {
             repaint();
 
         });
+
+        //Message button is for sending messages to enrolled students
         JButton messageButton = new JButton();
         messageButton.setIcon(new ImageIcon("icons/message.png"));
         messageButton.setBounds(100,400,30,30);
@@ -95,6 +107,8 @@ public class LecturerConsole extends JFrame {
             repaint();
 
         });
+
+        //Edit button for editing previous attendances
         JButton editButton = new JButton();
         editButton.setIcon(new ImageIcon("icons/edit.png"));
         editButton.setBounds(150,400,30,30);
@@ -145,6 +159,8 @@ public class LecturerConsole extends JFrame {
             rightPanel.add(editSelectedDateButton);
             repaint();
         });
+
+        //NA Button is for displaying NA students in selected section
         JButton naButton = new JButton();
         naButton.setIcon(new ImageIcon("icons/na.png"));
         naButton.setBounds(200,400,30,30);
@@ -182,6 +198,8 @@ public class LecturerConsole extends JFrame {
         setVisible(true);
     }
 
+
+    //This class required for creating table in right frame
     class BooleanTableModel extends AbstractTableModel {
         String[] columns = {"Student Id", "Student Name", "1. Hour", "2. Hour"};
         Object[][] data = {
