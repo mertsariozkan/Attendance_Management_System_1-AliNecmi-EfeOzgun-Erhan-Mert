@@ -13,7 +13,15 @@ import java.util.ArrayList;
  * **/
 
 public class LecturerConsole extends JFrame {
-    public LecturerConsole() {
+
+    DatabaseOperations db;
+    public LecturerConsole(Lecturer lecturer) {
+
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+        String currentDate = dtf.format(LocalDate.now());
+
+
+        db = new DatabaseOperations();
         setSize(900,500);
         setResizable(false);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -33,13 +41,14 @@ public class LecturerConsole extends JFrame {
         rightPanel.setBorder(BorderFactory.createLineBorder(Color.black,3));
 
 
-        //Dummy data
-        ArrayList<String> sections = new ArrayList<>();
-        sections.add("SE311");
-        sections.add("SE375");
-        sections.add("CE303");
 
-        String[] sectionsArray = sections.toArray(String[]::new);
+        //get sections of lecturer in a list
+        ArrayList<String> sectionNames = new ArrayList<>();
+        for(Section s : lecturer.getSections()) {
+            sectionNames.add(String.valueOf(s.getSectionId()));
+        }
+        String[] sectionsArray = sectionNames.toArray(String[]::new);
+
 
         JList list = new JList(sectionsArray);
         list.setBounds(0,0,leftPanel.getWidth(),leftPanel.getHeight()/2);
@@ -53,10 +62,7 @@ public class LecturerConsole extends JFrame {
         newAttendanceButton.addActionListener(e -> {
             rightPanel.removeAll();
 
-            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd");
-            LocalDate localDate = LocalDate.now();
-
-            JLabel dateLabel = new JLabel("Date: "+dtf.format(localDate));
+            JLabel dateLabel = new JLabel("Date: "+currentDate);
             dateLabel.setBounds(10,5,300,20);
 
             ScrollPane studentPane = new ScrollPane();
@@ -95,8 +101,10 @@ public class LecturerConsole extends JFrame {
             contentArea.setBounds(20,150,rightPanel.getWidth()-40,200);
             JButton sendButton = new JButton("Send message");
             sendButton.setBounds(20,400,150,30);
+
             sendButton.addActionListener(e1 -> {
-                //Send message.
+                //Send message
+                db.sendMessage(lecturer.getSections().get(list.getSelectedIndex()).getSectionId(),titleField.getText(),contentArea.getText(),currentDate);
             });
             rightPanel.removeAll();
             rightPanel.add(titleLabel);

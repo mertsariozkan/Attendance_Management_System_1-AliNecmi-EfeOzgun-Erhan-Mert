@@ -50,7 +50,7 @@ public class LoginScreen extends JFrame {
                 case "Lecturer":
                     //Lecturer login
                     setVisible(false);
-                    new LecturerConsole();
+                    new LecturerConsole(new Lecturer(Integer.parseInt(idField.getText())));
                     break;
                 case "Admin":
                     //Admin login

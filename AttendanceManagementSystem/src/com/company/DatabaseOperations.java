@@ -1,6 +1,7 @@
 package com.company;
 
 import java.sql.*;
+import java.util.ArrayList;
 
 public class DatabaseOperations {
 
@@ -37,6 +38,7 @@ public class DatabaseOperations {
         String createMessagesTable = "CREATE TABLE IF NOT EXISTS Messages (\n"
                 + " id integer primary key,\n"
                 + " sectionId integer not null,\n"
+                + " title text not null,\n"
                 + " message text not null,\n"
                 + " date text not null\n"
                 + ");";
@@ -163,6 +165,35 @@ public class DatabaseOperations {
         }
         return false;
     }
+
+    public ArrayList<Section> getSectionsOfLecturer(Lecturer lecturer) {
+        ArrayList<Section> sections = new ArrayList<>();
+        String sqlString = "SELECT * FROM Sections WHERE lecturerId='"+lecturer.getId()+"';";
+        ResultSet resultSet = getResultSet(sqlString);
+        try{
+            while(resultSet.next()) {
+                Section section = new Section(resultSet.getInt("sectionId"),resultSet.getInt("lectureId"),lecturer,resultSet.getString("date"));
+                sections.add(section);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return sections;
+
+    }
+
+    public void sendMessage(int sectionId, String title, String content, String date) {
+        String insertMessage = "INSERT INTO Messages(sectionId,title,message,date) VALUES ('" + sectionId + "','" + title + "','" + content + "','" + date + "')";
+        Statement statement;
+        try {
+            statement = connection.createStatement();
+            statement.execute(insertMessage);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+
 
     public boolean connectToDatabase() {
         try {
