@@ -9,9 +9,7 @@ public class Lecturer {
     private ArrayList<Section> sections;
 
     public Lecturer(int id) {
-        DatabaseOperations db = new DatabaseOperations();
         this.id = id;
-        sections = db.getSectionsOfLecturer(this);
     }
 
     public int getId() {
@@ -39,13 +37,10 @@ public class Lecturer {
     }
 
     public ArrayList<Section> getSections() {
+        DatabaseOperations db = new DatabaseOperations();
+        sections = db.getSectionsOfLecturer(this);
         return sections;
     }
-
-    public void setSections(ArrayList<Section> sections) {
-        this.sections = sections;
-    }
-
 
 
 }

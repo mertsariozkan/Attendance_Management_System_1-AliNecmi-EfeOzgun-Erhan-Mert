@@ -22,7 +22,7 @@ public class DatabaseOperations {
         String createSectionsTable = "CREATE TABLE IF NOT EXISTS Sections (\n"
                 + " sectionId integer primary key,\n"
                 + " lectureId integer not null,\n"
-                + " lecturerId text not null,\n"
+                + " lecturerId integer not null,\n"
                 + " date text not null\n"
                 + ");";
         String createLecturersTable = "CREATE TABLE IF NOT EXISTS Lecturers (\n"
@@ -180,6 +180,77 @@ public class DatabaseOperations {
         }
         return sections;
 
+    }
+
+    public ArrayList<Section> getSectionsOfStudent(Student student) {
+        ArrayList<Section> sections = new ArrayList<>();
+        String sqlString = "SELECT sectionId FROM Enrollments WHERE studentId='"+student.getId()+"';";
+        ResultSet resultSet = getResultSet(sqlString);
+        try{
+            while(resultSet.next()) {
+                Section section = getSection(resultSet.getInt("sectionId"));
+                sections.add(section);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return sections;
+
+    }
+
+    public ArrayList<Student> getStudentsOfSection(Section section) {
+        ArrayList<Student> students = new ArrayList<>();
+        String sqlString = "SELECT studentId FROM Enrollments WHERE sectionId='"+section.getSectionId()+"';";
+        ResultSet resultSet = getResultSet(sqlString);
+        try{
+            while(resultSet.next()) {
+                Student student = getStudent(resultSet.getInt("studentId"));
+                students.add(student);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return students;
+
+    }
+
+    public Student getStudent(int studentId) {
+        String sqlString = "SELECT * FROM Students WHERE studentId='"+studentId+"';";
+        ResultSet resultSet = getResultSet(sqlString);
+        try{
+            if(resultSet.next()) {
+                return new Student(resultSet.getInt("studentId"),resultSet.getString("name"),resultSet.getString("password"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public Section getSection(int sectionId) {
+        String sqlString = "SELECT * FROM Sections WHERE sectionId='"+sectionId+"';";
+        ResultSet resultSet = getResultSet(sqlString);
+        try{
+            if(resultSet.next()) {
+                return new Section(resultSet.getInt("sectionId"),resultSet.getInt("lectureId"),new Lecturer(resultSet.getInt("lecturerId")),resultSet.getString("date"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public Lecture getLecture(int lectureId) {
+        String sqlString = "SELECT * FROM Lectures WHERE lectureId='"+lectureId+"';";
+        ResultSet resultSet = getResultSet(sqlString);
+        try{
+            if(resultSet.next()) {
+                return new Lecture(resultSet.getInt("lectureId"),resultSet.getString("name"),resultSet.getInt("hours"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public void sendMessage(int sectionId, String title, String content, String date) {

@@ -9,10 +9,6 @@ public class Section {
     private String date;
     private ArrayList<Student> students;
 
-    public Section() {
-
-    }
-
     public Section(int sectionId, int lectureId, Lecturer lecturer, String date) {
         this.sectionId = sectionId;
         this.lectureId = lectureId;
@@ -51,5 +47,12 @@ public class Section {
     public void setDate(String date) {
         this.date = date;
     }
+
+    public ArrayList<Student> getStudents() {
+        DatabaseOperations db = new DatabaseOperations();
+        students = db.getStudentsOfSection(this);
+        return students;
+    }
+
 
 }

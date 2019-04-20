@@ -68,7 +68,7 @@ public class LecturerConsole extends JFrame {
             ScrollPane studentPane = new ScrollPane();
             studentPane.setBounds(0,10,rightPanel.getWidth(),400);
 
-            JTable table = new JTable(new BooleanTableModel());
+            JTable table = new JTable(new BooleanTableModel(lecturer.getSections().get(list.getSelectedIndex())));
             JScrollPane scrollPane = new JScrollPane(table);
             scrollPane.setBounds(10,25,rightPanel.getWidth()-20,rightPanel.getHeight()-100);
 
@@ -147,7 +147,7 @@ public class LecturerConsole extends JFrame {
                 JLabel selectedDate = new JLabel("Date: "+dates[dateTable.getSelectedRow()][0]);
                 selectedDate.setBounds(10,5,300,20);
 
-                JTable table = new JTable(new BooleanTableModel());
+                JTable table = new JTable(new BooleanTableModel(lecturer.getSections().get(list.getSelectedIndex())));
                 JScrollPane scrollPane1 = new JScrollPane(table);
                 scrollPane1.setBounds(10,25,rightPanel.getWidth()-20,rightPanel.getHeight()-100);
 
@@ -209,14 +209,33 @@ public class LecturerConsole extends JFrame {
 
     //This class required for creating table in right frame
     class BooleanTableModel extends AbstractTableModel {
-        String[] columns = {"Student Id", "Student Name", "1. Hour", "2. Hour"};
-        Object[][] data = {
-                {"S001", "ALICE", Boolean.FALSE , Boolean.FALSE},
-                {"S002", "BOB",Boolean.FALSE , Boolean.FALSE},
-                {"S003", "CAROL", Boolean.FALSE, Boolean.FALSE},
-                {"S004", "IGNASIA",Boolean.FALSE , Boolean.FALSE},
-                {"S005", "MALLORY", Boolean.FALSE, Boolean.FALSE}
-        };
+        private Lecture lecture;
+        private DatabaseOperations db;
+        private String[] columns;
+        private Object[][] data;
+
+        public BooleanTableModel(Section section) {
+            super();
+            db = new DatabaseOperations();
+            lecture = db.getLecture(section.getLectureId());
+            columns = new String[lecture.getHours()+2];
+            columns[0] = "Student Id";
+            columns[1] = "Student Name";
+            for(int i=2;i<lecture.getHours()+2;i++) {
+                columns[i] = i+". Hour";
+            }
+
+            ArrayList<Student> students = db.getStudentsOfSection(section);
+
+            data = new Object[students.size()][4];
+            for(int i=0;i<students.size();i++) {
+                data[i][0] = students.get(i).getId();
+                data[i][1] = students.get(i).getName();
+                data[i][2] = Boolean.FALSE;
+                data[i][3] = Boolean.FALSE;
+            }
+        }
+
 
         public int getRowCount() {
             return data.length;
