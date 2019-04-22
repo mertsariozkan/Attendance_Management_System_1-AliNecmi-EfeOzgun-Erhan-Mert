@@ -44,9 +44,11 @@ public class DatabaseOperations {
                 + ");";
         String createAttendancesTable = "CREATE TABLE IF NOT EXISTS Attendances (\n"
                 + " id integer primary key,\n"
+                + " date text not null,\n"
                 + " sectionId integer not null,\n"
                 + " studentId integer not null,\n"
-                + " date text not null\n"
+                + " hour integer not null,\n"
+                + " isAttend integer not null\n"
                 + ");";
         String createEnrollmentsTable = "CREATE TABLE IF NOT EXISTS Enrollments (\n"
                 + " id integer primary key,\n"
@@ -74,6 +76,7 @@ public class DatabaseOperations {
     }
 
     public void addLecturer(int lecturerId, String name, String password) {
+        connectToDatabase();
         String insertLecturer = "INSERT INTO Lecturers(lecturerId,name,password) VALUES ('" + lecturerId + "','" + name + "','" + password + "')";
         Statement statement;
         try {
@@ -81,10 +84,13 @@ public class DatabaseOperations {
             statement.execute(insertLecturer);
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            closeConnection();
         }
     }
 
     public void addStudent(int studentId, String name, String password) {
+        connectToDatabase();
         String insertStudent = "INSERT INTO Students(studentId,name,password) VALUES ('" + studentId + "','" + name + "','" + password + "')";
         Statement statement;
         try {
@@ -92,10 +98,13 @@ public class DatabaseOperations {
             statement.execute(insertStudent);
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            closeConnection();
         }
     }
 
     public void addLecture(int lectureId, String name, String hours) {
+        connectToDatabase();
         String insertLecture = "INSERT INTO Lectures(lectureId,name,hours) VALUES ('" + lectureId + "','" + name + "','" + hours + "')";
         Statement statement;
         try {
@@ -103,10 +112,13 @@ public class DatabaseOperations {
             statement.execute(insertLecture);
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            closeConnection();
         }
     }
 
     public void addSection(int lectureId, int lecturerId, String date) {
+        connectToDatabase();
         String insertSection = "INSERT INTO Sections(lectureId,lecturerId,date) VALUES ('" + lectureId + "','" + lecturerId + "','" + date + "')";
         Statement statement;
         try {
@@ -114,10 +126,13 @@ public class DatabaseOperations {
             statement.execute(insertSection);
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            closeConnection();
         }
     }
 
     public void enrollStudent(int sectionId, int studentId) {
+        connectToDatabase();
         String insertEnrollment = "INSERT INTO Enrollments(sectionId,studentId) VALUES ('" + sectionId + "','" + studentId + "')";
         Statement statement;
         try {
@@ -125,21 +140,42 @@ public class DatabaseOperations {
             statement.execute(insertEnrollment);
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            closeConnection();
         }
     }
 
-    public void takeAttendance(int sectionId, int studentId, String date) {
-        String insertAttendance = "INSERT INTO Attendances(sectionId,studentId,date) VALUES ('" + sectionId + "','" + studentId + "','" + date + "')";
+    public void takeAttendance(int sectionId, int studentId, String date, int hour, int isAttend) {
+        connectToDatabase();
+        String insertAttendance = "INSERT INTO Attendances(sectionId,studentId,date,hour,isAttend) VALUES ('" + sectionId + "','" + studentId + "','" + date + "','" + hour + "','" + isAttend + "')";
         Statement statement;
         try {
             statement = connection.createStatement();
             statement.execute(insertAttendance);
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            closeConnection();
         }
     }
 
+    public boolean isAttendanceTaken(int sectionId, String date) {
+        connectToDatabase();
+        String sqlString = "SELECT EXISTS(SELECT 1 FROM Attendances WHERE date='"+date+"' AND sectionId='"+sectionId+"')";
+        ResultSet resultSet = getResultSet(sqlString);
+        try {
+            if(resultSet.getBoolean(1)) {
+                return true;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        closeConnection();
+        return false;
+    }
+
     public boolean isUserExist(String userType, String userId, String password) {
+        connectToDatabase();
         String sqlString = null;
         switch (userType) {
             case "Student":
@@ -162,11 +198,14 @@ public class DatabaseOperations {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            closeConnection();
         }
         return false;
     }
 
     public ArrayList<Section> getSectionsOfLecturer(Lecturer lecturer) {
+        connectToDatabase();
         ArrayList<Section> sections = new ArrayList<>();
         String sqlString = "SELECT * FROM Sections WHERE lecturerId='"+lecturer.getId()+"';";
         ResultSet resultSet = getResultSet(sqlString);
@@ -177,12 +216,15 @@ public class DatabaseOperations {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            closeConnection();
         }
         return sections;
 
     }
 
     public ArrayList<Section> getSectionsOfStudent(Student student) {
+        connectToDatabase();
         ArrayList<Section> sections = new ArrayList<>();
         String sqlString = "SELECT sectionId FROM Enrollments WHERE studentId='"+student.getId()+"';";
         ResultSet resultSet = getResultSet(sqlString);
@@ -193,12 +235,15 @@ public class DatabaseOperations {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            closeConnection();
         }
         return sections;
 
     }
 
     public ArrayList<Student> getStudentsOfSection(Section section) {
+        connectToDatabase();
         ArrayList<Student> students = new ArrayList<>();
         String sqlString = "SELECT studentId FROM Enrollments WHERE sectionId='"+section.getSectionId()+"';";
         ResultSet resultSet = getResultSet(sqlString);
@@ -209,12 +254,15 @@ public class DatabaseOperations {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            closeConnection();
         }
         return students;
 
     }
 
     public Student getStudent(int studentId) {
+        connectToDatabase();
         String sqlString = "SELECT * FROM Students WHERE studentId='"+studentId+"';";
         ResultSet resultSet = getResultSet(sqlString);
         try{
@@ -223,11 +271,14 @@ public class DatabaseOperations {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            closeConnection();
         }
         return null;
     }
 
     public Section getSection(int sectionId) {
+        connectToDatabase();
         String sqlString = "SELECT * FROM Sections WHERE sectionId='"+sectionId+"';";
         ResultSet resultSet = getResultSet(sqlString);
         try{
@@ -236,11 +287,14 @@ public class DatabaseOperations {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            closeConnection();
         }
         return null;
     }
 
     public Lecture getLecture(int lectureId) {
+        connectToDatabase();
         String sqlString = "SELECT * FROM Lectures WHERE lectureId='"+lectureId+"';";
         ResultSet resultSet = getResultSet(sqlString);
         try{
@@ -249,11 +303,14 @@ public class DatabaseOperations {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            closeConnection();
         }
         return null;
     }
 
     public void sendMessage(int sectionId, String title, String content, String date) {
+        connectToDatabase();
         String insertMessage = "INSERT INTO Messages(sectionId,title,message,date) VALUES ('" + sectionId + "','" + title + "','" + content + "','" + date + "')";
         Statement statement;
         try {
@@ -261,6 +318,8 @@ public class DatabaseOperations {
             statement.execute(insertMessage);
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            closeConnection();
         }
     }
 
