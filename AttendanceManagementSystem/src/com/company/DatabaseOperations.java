@@ -2,6 +2,7 @@ package com.company;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class DatabaseOperations {
 
@@ -17,7 +18,8 @@ public class DatabaseOperations {
         String createLecturesTable = "CREATE TABLE IF NOT EXISTS Lectures (\n"
                 + " lectureId integer primary key,\n"
                 + " name text not null,\n"
-                + " hours integer not null\n"
+                + " hours integer not null,\n"
+                + " maxAttendance integer not null\n"
                 + ");";
         String createSectionsTable = "CREATE TABLE IF NOT EXISTS Sections (\n"
                 + " sectionId integer primary key,\n"
@@ -53,7 +55,8 @@ public class DatabaseOperations {
         String createEnrollmentsTable = "CREATE TABLE IF NOT EXISTS Enrollments (\n"
                 + " id integer primary key,\n"
                 + " sectionId integer not null,\n"
-                + " studentId integer not null\n"
+                + " studentId integer not null,\n"
+                + " attendance integer not null\n"
                 + ");";
         String createAdminsTable = "CREATE TABLE IF NOT EXISTS Admins (\n"
                 + " id integer primary key,\n"
@@ -133,11 +136,25 @@ public class DatabaseOperations {
 
     public void enrollStudent(int sectionId, int studentId) {
         connectToDatabase();
-        String insertEnrollment = "INSERT INTO Enrollments(sectionId,studentId) VALUES ('" + sectionId + "','" + studentId + "')";
+        String insertEnrollment = "INSERT INTO Enrollments(sectionId,studentId,attendance) VALUES ('" + sectionId + "','" + studentId + "','0')";
         Statement statement;
         try {
             statement = connection.createStatement();
             statement.execute(insertEnrollment);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            closeConnection();
+        }
+    }
+
+    public void updateAttendanceOfStudent(int studentId, int sectionId, int numberOfAbsentHours) {
+        connectToDatabase();
+        String updateAttendance = "UPDATE Enrollments SET attendance=attendance+"+numberOfAbsentHours+" WHERE studentId='"+studentId+"' AND sectionId='"+sectionId+"'";
+        Statement statement;
+        try {
+            statement = connection.createStatement();
+            statement.execute(updateAttendance);
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -172,6 +189,22 @@ public class DatabaseOperations {
         }
         closeConnection();
         return false;
+    }
+
+    public ArrayList<Student> getNaStudents(int sectionId) {
+        ArrayList<Student> naStudents = new ArrayList<>();
+        String sqlString = "SELECT * FROM Enrollments WHERE sectionId='"+sectionId+"' AND attendance>='"+getLecture(getSection(sectionId).getLectureId()).getMaxAttendance()+"'";
+        connectToDatabase();
+        ResultSet resultSet = getResultSet(sqlString);
+        try {
+            while (resultSet.next()) {
+                naStudents.add(getNaStudent(resultSet.getInt("studentId"),resultSet.getInt("attendance")));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        closeConnection();
+        return naStudents;
     }
 
     public boolean isUserExist(String userType, String userId, String password) {
@@ -277,6 +310,22 @@ public class DatabaseOperations {
         return null;
     }
 
+    public Student getNaStudent(int studentId,int attendance) {
+        connectToDatabase();
+        String sqlString = "SELECT * FROM Students WHERE studentId='"+studentId+"';";
+        ResultSet resultSet = getResultSet(sqlString);
+        try{
+            if(resultSet.next()) {
+                return new Student(resultSet.getInt("studentId"),resultSet.getString("name"),attendance);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            closeConnection();
+        }
+        return null;
+    }
+
     public Section getSection(int sectionId) {
         connectToDatabase();
         String sqlString = "SELECT * FROM Sections WHERE sectionId='"+sectionId+"';";
@@ -299,7 +348,7 @@ public class DatabaseOperations {
         ResultSet resultSet = getResultSet(sqlString);
         try{
             if(resultSet.next()) {
-                return new Lecture(resultSet.getInt("lectureId"),resultSet.getString("name"),resultSet.getInt("hours"));
+                return new Lecture(resultSet.getInt("lectureId"),resultSet.getString("name"),resultSet.getInt("hours"),resultSet.getInt("maxAttendance"));
             }
         } catch (SQLException e) {
             e.printStackTrace();

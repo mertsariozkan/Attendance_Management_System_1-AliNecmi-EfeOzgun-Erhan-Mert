@@ -8,10 +8,7 @@ import java.awt.*;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.Locale;
+import java.util.*;
 
 /**
  * This class contains UI for lecturer console
@@ -94,10 +91,15 @@ public class LecturerConsole extends JFrame {
                 submitButton.addActionListener(e1 -> {
                     //Save attendance
                     for (int i = 0; i < tableModel.getRowCount(); i++) {
+                        int absentHours=0;
                         for (int j = 2; j < tableModel.getColumnCount(); j++) {
                             System.out.println(tableModel.getValueAt(i, j));
-                            db.takeAttendance(Integer.valueOf((String)list.getSelectedValue()), (int) tableModel.getValueAt(i, 0), currentDate, (j - 1), (Boolean)tableModel.getValueAt(i,j)?1:0);
+                            db.takeAttendance(lecturer.getSections().get(list.getSelectedIndex()).getSectionId(), (int) tableModel.getValueAt(i, 0), currentDate, (j - 1), (Boolean)tableModel.getValueAt(i,j)?1:0);
+                            if(!(Boolean)tableModel.getValueAt(i,j)) {
+                                absentHours++;
+                            }
                         }
+                        db.updateAttendanceOfStudent((int) tableModel.getValueAt(i, 0),lecturer.getSections().get(list.getSelectedIndex()).getSectionId(),absentHours);
                     }
                     JOptionPane.showMessageDialog(this, "Attandance is saved successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
                     rightPanel.removeAll();
@@ -202,12 +204,16 @@ public class LecturerConsole extends JFrame {
         naButton.setToolTipText("Show N/A students");
         naButton.addActionListener(e -> {
             rightPanel.removeAll();
-            String[][] naStudents = {
-                    {"20150601041", "Mert Sariozkan", "20"},
-                    {"20150601042", "Erhan Sahan", "18"}
-            };
+            ArrayList<Student> naStudents = db.getNaStudents(lecturer.getSections().get(list.getSelectedIndex()).getSectionId());
+            String[][] naStudentsArray = new String[naStudents.size()][3];
+            for (int i = 0; i < naStudents.size(); i++) {
+                naStudentsArray[i][0] = String.valueOf(naStudents.get(i).getId());
+                naStudentsArray[i][1] = naStudents.get(i).getName();
+                naStudentsArray[i][2] = String.valueOf(naStudents.get(i).getAttendance());
+
+            }
             String[] columnNames = {"Student Id", "Student Name", "Absenteeism"};
-            JTable naTable = new JTable(naStudents, columnNames);
+            JTable naTable = new JTable(naStudentsArray, columnNames);
             naTable.setRowHeight(20);
             naTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
             naTable.getColumnModel().getColumn(0).setMinWidth(rightPanel.getWidth() / 3);
