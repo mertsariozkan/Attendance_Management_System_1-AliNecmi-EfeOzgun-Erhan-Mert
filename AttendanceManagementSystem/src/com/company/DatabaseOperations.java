@@ -11,6 +11,7 @@ public class DatabaseOperations {
     public DatabaseOperations() {
         connectToDatabase();
         prepareDatabase();
+        closeConnection();
 
     }
 
@@ -150,7 +151,7 @@ public class DatabaseOperations {
 
     public void updateAttendanceOfStudent(int studentId, int sectionId, int numberOfAbsentHours) {
         connectToDatabase();
-        String updateAttendance = "UPDATE Enrollments SET attendance=attendance+"+numberOfAbsentHours+" WHERE studentId='"+studentId+"' AND sectionId='"+sectionId+"'";
+        String updateAttendance = "UPDATE Enrollments SET attendance=attendance+" + numberOfAbsentHours + " WHERE studentId='" + studentId + "' AND sectionId='" + sectionId + "'";
         Statement statement;
         try {
             statement = connection.createStatement();
@@ -160,6 +161,39 @@ public class DatabaseOperations {
         } finally {
             closeConnection();
         }
+    }
+
+    public ArrayList<String> getPastAttendanceDates(int sectionId) {
+        connectToDatabase();
+        ArrayList<String> dates = new ArrayList<>();
+        String sqlString = "SELECT DISTINCT date FROM Attendances WHERE sectionId=" + sectionId;
+        ResultSet resultSet = getResultSet(sqlString);
+        try {
+            while (resultSet.next()) {
+                dates.add(resultSet.getString("date"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            closeConnection();
+        }
+        return dates;
+    }
+
+    public boolean isStudentAttendedAt(int studentId, int sectionId, String date, int hour) {
+        connectToDatabase();
+        String sqlString = "SELECT isAttend FROM Attendances WHERE studentId='" + studentId + "' AND sectionId='" + sectionId + "' AND date='" + date + "' AND hour='" + hour + "'";
+        ResultSet resultSet = getResultSet(sqlString);
+        try {
+            if (resultSet.next()) {
+                return resultSet.getInt("isAttend") == 1;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            closeConnection();
+        }
+        return false;
     }
 
     public void takeAttendance(int sectionId, int studentId, String date, int hour, int isAttend) {
@@ -176,34 +210,62 @@ public class DatabaseOperations {
         }
     }
 
+    public void updateAttendance(int sectionId, int studentId, String date, int hour, int isAttend) {
+        boolean isAttendBeforeUpdate = isStudentAttendedAt(studentId, sectionId, date, hour);
+        boolean isAttendNow = (isAttend == 1);
+        if (isAttendBeforeUpdate != isAttendNow) {
+            connectToDatabase();
+            String updateAttendanceString = "UPDATE Attendances SET isAttend=" + isAttend + " WHERE studentId='" + studentId + "' AND sectionId='" + sectionId + "' AND date='" + date + "' AND hour='" + hour + "'";
+            Statement statement;
+            try {
+                statement = connection.createStatement();
+                statement.execute(updateAttendanceString);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } finally {
+                closeConnection();
+            }
+            if (isAttendNow) {
+                //decrease attendance by 1
+                updateAttendanceOfStudent(studentId,sectionId,-1);
+            } else {
+                //increase attendance by 1
+                updateAttendanceOfStudent(studentId,sectionId,1);
+            }
+        }
+
+    }
+
     public boolean isAttendanceTaken(int sectionId, String date) {
         connectToDatabase();
-        String sqlString = "SELECT EXISTS(SELECT 1 FROM Attendances WHERE date='"+date+"' AND sectionId='"+sectionId+"')";
+        String sqlString = "SELECT EXISTS(SELECT 1 FROM Attendances WHERE date='" + date + "' AND sectionId='" + sectionId + "')";
         ResultSet resultSet = getResultSet(sqlString);
         try {
-            if(resultSet.getBoolean(1)) {
+            if (resultSet.getBoolean(1)) {
                 return true;
             }
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            closeConnection();
         }
-        closeConnection();
         return false;
     }
 
     public ArrayList<Student> getNaStudents(int sectionId) {
         ArrayList<Student> naStudents = new ArrayList<>();
-        String sqlString = "SELECT * FROM Enrollments WHERE sectionId='"+sectionId+"' AND attendance>='"+getLecture(getSection(sectionId).getLectureId()).getMaxAttendance()+"'";
+        String sqlString = "SELECT * FROM Enrollments WHERE sectionId='" + sectionId + "' AND attendance>='" + getLecture(getSection(sectionId).getLectureId()).getMaxAttendance() + "'";
         connectToDatabase();
         ResultSet resultSet = getResultSet(sqlString);
         try {
             while (resultSet.next()) {
-                naStudents.add(getNaStudent(resultSet.getInt("studentId"),resultSet.getInt("attendance")));
+                naStudents.add(getNaStudent(resultSet.getInt("studentId"), resultSet.getInt("attendance")));
             }
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            closeConnection();
         }
-        closeConnection();
         return naStudents;
     }
 
@@ -213,20 +275,20 @@ public class DatabaseOperations {
         switch (userType) {
             case "Student":
                 //Check if user exist
-                sqlString = "SELECT * FROM Students WHERE studentId='"+userId+"' AND password='"+password+"';";
+                sqlString = "SELECT * FROM Students WHERE studentId='" + userId + "' AND password='" + password + "';";
                 break;
             case "Lecturer":
                 //Check if user exist
-                sqlString = "SELECT * FROM Lecturers WHERE lecturerId='"+userId+"' AND password='"+password+"';";
+                sqlString = "SELECT * FROM Lecturers WHERE lecturerId='" + userId + "' AND password='" + password + "';";
                 break;
             case "Admin":
                 //Check if user exist
-                sqlString = "SELECT * FROM Admins WHERE username='"+userId+"' AND password='"+password+"';";
+                sqlString = "SELECT * FROM Admins WHERE username='" + userId + "' AND password='" + password + "';";
                 break;
         }
         ResultSet resultSet = getResultSet(sqlString);
         try {
-            if(resultSet.next()) {
+            if (resultSet.next()) {
                 return true;
             }
         } catch (SQLException e) {
@@ -240,11 +302,11 @@ public class DatabaseOperations {
     public ArrayList<Section> getSectionsOfLecturer(Lecturer lecturer) {
         connectToDatabase();
         ArrayList<Section> sections = new ArrayList<>();
-        String sqlString = "SELECT * FROM Sections WHERE lecturerId='"+lecturer.getId()+"';";
+        String sqlString = "SELECT * FROM Sections WHERE lecturerId='" + lecturer.getId() + "';";
         ResultSet resultSet = getResultSet(sqlString);
-        try{
-            while(resultSet.next()) {
-                Section section = new Section(resultSet.getInt("sectionId"),resultSet.getInt("lectureId"),lecturer,resultSet.getString("date"));
+        try {
+            while (resultSet.next()) {
+                Section section = new Section(resultSet.getInt("sectionId"), resultSet.getInt("lectureId"), lecturer, resultSet.getString("date"));
                 sections.add(section);
             }
         } catch (SQLException e) {
@@ -259,10 +321,10 @@ public class DatabaseOperations {
     public ArrayList<Section> getSectionsOfStudent(Student student) {
         connectToDatabase();
         ArrayList<Section> sections = new ArrayList<>();
-        String sqlString = "SELECT sectionId FROM Enrollments WHERE studentId='"+student.getId()+"';";
+        String sqlString = "SELECT sectionId FROM Enrollments WHERE studentId='" + student.getId() + "';";
         ResultSet resultSet = getResultSet(sqlString);
-        try{
-            while(resultSet.next()) {
+        try {
+            while (resultSet.next()) {
                 Section section = getSection(resultSet.getInt("sectionId"));
                 sections.add(section);
             }
@@ -278,10 +340,10 @@ public class DatabaseOperations {
     public ArrayList<Student> getStudentsOfSection(Section section) {
         connectToDatabase();
         ArrayList<Student> students = new ArrayList<>();
-        String sqlString = "SELECT studentId FROM Enrollments WHERE sectionId='"+section.getSectionId()+"';";
+        String sqlString = "SELECT studentId FROM Enrollments WHERE sectionId='" + section.getSectionId() + "';";
         ResultSet resultSet = getResultSet(sqlString);
-        try{
-            while(resultSet.next()) {
+        try {
+            while (resultSet.next()) {
                 Student student = getStudent(resultSet.getInt("studentId"));
                 students.add(student);
             }
@@ -296,11 +358,11 @@ public class DatabaseOperations {
 
     public Student getStudent(int studentId) {
         connectToDatabase();
-        String sqlString = "SELECT * FROM Students WHERE studentId='"+studentId+"';";
+        String sqlString = "SELECT * FROM Students WHERE studentId='" + studentId + "';";
         ResultSet resultSet = getResultSet(sqlString);
-        try{
-            if(resultSet.next()) {
-                return new Student(resultSet.getInt("studentId"),resultSet.getString("name"),resultSet.getString("password"));
+        try {
+            if (resultSet.next()) {
+                return new Student(resultSet.getInt("studentId"), resultSet.getString("name"), resultSet.getString("password"));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -310,13 +372,13 @@ public class DatabaseOperations {
         return null;
     }
 
-    public Student getNaStudent(int studentId,int attendance) {
+    public Student getNaStudent(int studentId, int attendance) {
         connectToDatabase();
-        String sqlString = "SELECT * FROM Students WHERE studentId='"+studentId+"';";
+        String sqlString = "SELECT * FROM Students WHERE studentId='" + studentId + "';";
         ResultSet resultSet = getResultSet(sqlString);
-        try{
-            if(resultSet.next()) {
-                return new Student(resultSet.getInt("studentId"),resultSet.getString("name"),attendance);
+        try {
+            if (resultSet.next()) {
+                return new Student(resultSet.getInt("studentId"), resultSet.getString("name"), attendance);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -328,11 +390,11 @@ public class DatabaseOperations {
 
     public Section getSection(int sectionId) {
         connectToDatabase();
-        String sqlString = "SELECT * FROM Sections WHERE sectionId='"+sectionId+"';";
+        String sqlString = "SELECT * FROM Sections WHERE sectionId='" + sectionId + "';";
         ResultSet resultSet = getResultSet(sqlString);
-        try{
-            if(resultSet.next()) {
-                return new Section(resultSet.getInt("sectionId"),resultSet.getInt("lectureId"),new Lecturer(resultSet.getInt("lecturerId")),resultSet.getString("date"));
+        try {
+            if (resultSet.next()) {
+                return new Section(resultSet.getInt("sectionId"), resultSet.getInt("lectureId"), new Lecturer(resultSet.getInt("lecturerId")), resultSet.getString("date"));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -344,11 +406,11 @@ public class DatabaseOperations {
 
     public Lecture getLecture(int lectureId) {
         connectToDatabase();
-        String sqlString = "SELECT * FROM Lectures WHERE lectureId='"+lectureId+"';";
+        String sqlString = "SELECT * FROM Lectures WHERE lectureId='" + lectureId + "';";
         ResultSet resultSet = getResultSet(sqlString);
-        try{
-            if(resultSet.next()) {
-                return new Lecture(resultSet.getInt("lectureId"),resultSet.getString("name"),resultSet.getInt("hours"),resultSet.getInt("maxAttendance"));
+        try {
+            if (resultSet.next()) {
+                return new Lecture(resultSet.getInt("lectureId"), resultSet.getString("name"), resultSet.getInt("hours"), resultSet.getInt("maxAttendance"));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -371,7 +433,6 @@ public class DatabaseOperations {
             closeConnection();
         }
     }
-
 
 
     public boolean connectToDatabase() {

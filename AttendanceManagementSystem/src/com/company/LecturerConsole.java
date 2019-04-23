@@ -47,7 +47,7 @@ public class LecturerConsole extends JFrame {
         //get sections of lecturer in a list
         ArrayList<String> sectionNames = new ArrayList<>();
         for (Section s : lecturer.getSections()) {
-            sectionNames.add(String.valueOf(s.getSectionId()));
+            sectionNames.add(s.getLecture().getName()+"  -  "+s.getSectionId());
         }
         String[] sectionsArray = sectionNames.toArray(String[]::new);
 
@@ -152,10 +152,13 @@ public class LecturerConsole extends JFrame {
         editButton.setToolTipText("Edit attendances");
         editButton.addActionListener(e -> {
             rightPanel.removeAll();
-            String[][] dates = {
-                    {"2019/3/10"},
-                    {"2019/3/16"}
-            };
+
+            //Getting past attendance dates of selected section to a dates array
+            ArrayList<String> pastDates = db.getPastAttendanceDates(lecturer.getSections().get(list.getSelectedIndex()).getSectionId());
+            String [][] dates = new String[pastDates.size()][1];
+            for (int i = 0; i < pastDates.size(); i++) {
+                dates[i][0] = pastDates.get(i);
+            }
             String[] columnNames = {"Past lecture dates"};
             JTable dateTable = new JTable(dates, columnNames) {
                 @Override
@@ -163,6 +166,7 @@ public class LecturerConsole extends JFrame {
                     return false;
                 }
             };
+
             dateTable.setRowHeight(20);
             dateTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
             dateTable.getColumnModel().getColumn(0).setMinWidth(rightPanel.getWidth());
@@ -175,8 +179,8 @@ public class LecturerConsole extends JFrame {
                 rightPanel.removeAll();
                 JLabel selectedDate = new JLabel("Date: " + dates[dateTable.getSelectedRow()][0]);
                 selectedDate.setBounds(10, 5, 300, 20);
-
-                JTable table = new JTable(new BooleanTableModel(lecturer.getSections().get(list.getSelectedIndex())));
+                BooleanTableModel tableModel = new BooleanTableModel(lecturer.getSections().get(list.getSelectedIndex()),dates[dateTable.getSelectedRow()][0]);
+                JTable table = new JTable(tableModel);
                 JScrollPane scrollPane1 = new JScrollPane(table);
                 scrollPane1.setBounds(10, 25, rightPanel.getWidth() - 20, rightPanel.getHeight() - 100);
 
@@ -184,6 +188,15 @@ public class LecturerConsole extends JFrame {
                 submitButton.setBounds(5, rightPanel.getHeight() - 70, 300, 30);
                 submitButton.addActionListener(e2 -> {
                     //Save attendance
+                    for (int i = 0; i < tableModel.getRowCount(); i++) {
+                        for (int j = 2; j < tableModel.getColumnCount(); j++) {
+                            System.out.println(tableModel.getValueAt(i, j));
+                            db.updateAttendance(lecturer.getSections().get(list.getSelectedIndex()).getSectionId(), (int) tableModel.getValueAt(i, 0), dates[dateTable.getSelectedRow()][0], (j - 1), (Boolean)tableModel.getValueAt(i,j)?1:0);
+                        }
+                    }
+                    JOptionPane.showMessageDialog(this, "Attandance is saved successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
+                    rightPanel.removeAll();
+                    repaint();
                 });
 
                 rightPanel.add(selectedDate);
@@ -247,6 +260,7 @@ public class LecturerConsole extends JFrame {
         private String[] columns;
         private Object[][] data;
 
+        //This constructer gets default attendance list of selected section
         public BooleanTableModel(Section section) {
             super();
             db = new DatabaseOperations();
@@ -264,8 +278,34 @@ public class LecturerConsole extends JFrame {
             for (int i = 0; i < students.size(); i++) {
                 data[i][0] = students.get(i).getId();
                 data[i][1] = students.get(i).getName();
-                data[i][2] = Boolean.FALSE;
-                data[i][3] = Boolean.FALSE;
+                for(int j=2;j<columns.length;j++) {
+                    data[i][j] = Boolean.FALSE;
+                }
+            }
+        }
+
+        //This constructor is for getting selected date's attendance list with correctly filled checkboxes
+        public BooleanTableModel(Section section, String date) {
+            super();
+            db = new DatabaseOperations();
+            lecture = db.getLecture(section.getLectureId());
+            columns = new String[lecture.getHours() + 2];
+            columns[0] = "Student Id";
+            columns[1] = "Student Name";
+            for (int i = 2; i < lecture.getHours() + 2; i++) {
+                columns[i] = (i - 1) + ". Hour";
+            }
+
+            ArrayList<Student> students = db.getStudentsOfSection(section);
+
+            data = new Object[students.size()][4];
+            for (int i = 0; i < students.size(); i++) {
+                data[i][0] = students.get(i).getId();
+                data[i][1] = students.get(i).getName();
+                for(int j=2;j<columns.length;j++) {
+                    data[i][j] = db.isStudentAttendedAt(students.get(i).getId(),section.getSectionId(),date,j-1)?Boolean.TRUE:Boolean.FALSE;
+                    System.out.println(data[i][j]);
+                }
             }
         }
 

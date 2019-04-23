@@ -6,6 +6,7 @@ public class Section {
     private int sectionId;
     private int lectureId;
     private Lecturer lecturer;
+    private Lecture lecture;
     private String date;
     private ArrayList<Student> students;
 
@@ -54,5 +55,9 @@ public class Section {
         return students;
     }
 
-
+    public Lecture getLecture() {
+        DatabaseOperations db = new DatabaseOperations();
+        lecture = db.getLecture(getLectureId());
+        return lecture;
+    }
 }
