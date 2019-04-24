@@ -35,8 +35,10 @@ public class DatabaseOperations {
                 + ");";
         String createStudentsTable = "CREATE TABLE IF NOT EXISTS Students (\n"
                 + " studentId integer primary key,\n"
-                + " name text not null,\n"
-                + " password text not null\n"
+                + " name text not null,\n"            
+                + " password text not null,\n"
+                + " department text not null,\n"
+                + " class integer not null\n"
                 + ");";
         String createMessagesTable = "CREATE TABLE IF NOT EXISTS Messages (\n"
                 + " id integer primary key,\n"
@@ -93,9 +95,9 @@ public class DatabaseOperations {
         }
     }
 
-    public void addStudent(int studentId, String name, String password) {
+    public void addStudent(int studentId, String name, String password,String department,int class_ ) {
         connectToDatabase();
-        String insertStudent = "INSERT INTO Students(studentId,name,password) VALUES ('" + studentId + "','" + name + "','" + password + "')";
+        String insertStudent = "INSERT INTO Students(studentId,name,password,department,class) VALUES ('" + studentId + "','" + name + "','" + password + "','"+ department +"','" + class_ + "')";
         Statement statement;
         try {
             statement = connection.createStatement();
@@ -362,7 +364,7 @@ public class DatabaseOperations {
         ResultSet resultSet = getResultSet(sqlString);
         try {
             if (resultSet.next()) {
-                return new Student(resultSet.getInt("studentId"), resultSet.getString("name"), resultSet.getString("password"));
+                return new Student(resultSet.getInt("studentId"), resultSet.getString("name"), resultSet.getString("password"),resultSet.getString("department"),resultSet.getInt("class"));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -466,6 +468,72 @@ public class DatabaseOperations {
         }
         return null;
     }
-
+    
+    
+    
+    public String getStudentName(int studentId) {
+        connectToDatabase();
+        String sqlString = "SELECT name FROM Students WHERE studentId='" + studentId + "';";
+        ResultSet resultSet = getResultSet(sqlString);
+        try {
+            if (resultSet.next()) {
+                return resultSet.getString(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            closeConnection();
+        }
+        return null;
+    }
+    public String getStudentDepartment(int studentId) {
+        connectToDatabase();
+        String sqlString = "SELECT department FROM Students WHERE studentId='" + studentId + "';";
+        ResultSet resultSet = getResultSet(sqlString);
+        try {
+            if (resultSet.next()) {
+                return resultSet.getString(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            closeConnection();
+        }
+        return null;
+    }
+    public String getStudentClass(int studentId) {
+        connectToDatabase();
+        String sqlString = "SELECT class FROM Students WHERE studentId='" + studentId + "';";
+        ResultSet resultSet = getResultSet(sqlString);
+        try {
+            if (resultSet.next()) {
+                return resultSet.getString(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            closeConnection();
+        }
+        return null;
+    }
+    
+    public ArrayList<Message> getMessage(int studentId) {
+        connectToDatabase();
+        ArrayList<Message> messages = new ArrayList<>();
+        String getMessageTitleQuery = "Select Messages.id,Messages.sectionId,Messages.message,Messages.title,Messages.date,Lecturers.name From Messages,Enrollments,Students,Sections,Lecturers where Enrollments.sectionId = Messages.sectionId AND Enrollments.sectionID = Sections.sectionId AND Sections.lectureId = Lecturers.lecturerId AND Enrollments.studentId = Students.studentId AND Students.studentId='" +studentId  +"';";    
+        ResultSet resultSet = getResultSet(getMessageTitleQuery);
+        try {
+        	 while (resultSet.next()) {
+        		 Message message = new Message(resultSet.getInt("id"), resultSet.getInt("sectionId"), resultSet.getString("title"),resultSet.getString("message"),resultSet.getString("date"),resultSet.getString("name"));
+        		 messages.add(message);
+             }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            closeConnection();
+        }
+        return messages;
+    }
+    
 
 }

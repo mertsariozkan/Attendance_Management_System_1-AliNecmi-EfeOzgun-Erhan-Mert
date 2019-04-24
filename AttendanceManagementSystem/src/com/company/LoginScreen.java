@@ -48,7 +48,7 @@ public class LoginScreen extends JFrame {
                 switch (userType) {
                     case "Student":
                         //Student login
-                        new StudentConsole();
+                        new StudentConsole(new Student(Integer.parseInt(idField.getText())));
                         break;
                     case "Lecturer":
                         //Lecturer login

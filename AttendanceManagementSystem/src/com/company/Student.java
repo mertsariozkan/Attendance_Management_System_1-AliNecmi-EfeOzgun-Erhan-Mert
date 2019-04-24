@@ -8,12 +8,18 @@ public class Student {
     private String password;
     private int attendance;
     private ArrayList<Section> sections;
+    private String department;
+    private int class_;
 
-
-    public Student(int id, String name, String password) {
+    public Student (int id) {
+    	this.id=id;
+    }
+    public Student(int id, String name, String password,String department,int class_) {
         this.id = id;
         this.name = name;
         this.password = password;
+        this.setClass_(class_);
+        this.setDepartment(department);
     }
 
     //This constructor is for getting student dataset to display if he/she is NA.
@@ -56,5 +62,17 @@ public class Student {
     public int getAttendance() {
         return attendance;
     }
+	public String getDepartment() {
+		return department;
+	}
+	public void setDepartment(String department) {
+		this.department = department;
+	}
+	public int getClass_() {
+		return class_;
+	}
+	public void setClass_(int class_) {
+		this.class_ = class_;
+	}
 }
 
