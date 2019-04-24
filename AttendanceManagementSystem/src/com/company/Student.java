@@ -1,7 +1,7 @@
 package com.company;
 
 import java.util.ArrayList;
-
+//Student Class which provides the core elements and details of a student.
 public class Student {
     private int id;
     private String name;
@@ -14,7 +14,7 @@ public class Student {
     public Student (int id) {
     	this.id=id;
     }
-    public Student(int id, String name, String password,String department,int class_) {
+    public Student(int id, String name, String password,String department,int class_) {	//Student Constructor.
         this.id = id;
         this.name = name;
         this.password = password;
@@ -22,13 +22,15 @@ public class Student {
         this.setDepartment(department);
     }
 
-    //This constructor is for getting student dataset to display if he/she is NA.
-    public Student(int id, String name, int attendance) {
+    
+    public Student(int id, String name, int attendance) { //This constructor is for getting student dataset to display if he/she is NA.
         this.id = id;
         this.name = name;
         this.attendance = attendance;
     }
 
+    //Setters and Getters.
+    
     public int getId() {
         return id;
     }

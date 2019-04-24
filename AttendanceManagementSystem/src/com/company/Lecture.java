@@ -1,5 +1,6 @@
 package com.company;
 
+//Lecture Class which provides the core elements and details of a lecture.
 public class Lecture {
 
     private int lectureId;
@@ -7,13 +8,15 @@ public class Lecture {
     private int hours;
     private int maxAttendance;
 
-    public Lecture(int lectureId, String name, int hours, int maxAttendance) {
+    public Lecture(int lectureId, String name, int hours, int maxAttendance) { //Lecture Constructor.
         this.lectureId = lectureId;
         this.name = name;
         this.hours = hours;
         this.maxAttendance = maxAttendance;
     }
 
+    //Setters and Getters.
+    
     public int getLectureId() {
         return lectureId;
     }

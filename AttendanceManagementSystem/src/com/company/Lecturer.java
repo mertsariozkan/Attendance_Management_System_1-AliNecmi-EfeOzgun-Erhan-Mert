@@ -2,16 +2,19 @@ package com.company;
 
 import java.util.ArrayList;
 
+//Lecturer Class which provides the core elements and details of a lecturer.
 public class Lecturer {
     private int id;
     private String name;
     private String password;
     private ArrayList<Section> sections;
 
-    public Lecturer(int id) {
+    public Lecturer(int id) { //Lecturer Constructor.
         this.id = id;
     }
 
+    //Setters and Getters.
+    
     public int getId() {
         return id;
     }

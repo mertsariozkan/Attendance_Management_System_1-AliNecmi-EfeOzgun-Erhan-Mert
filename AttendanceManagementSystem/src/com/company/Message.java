@@ -1,6 +1,7 @@
 package com.company;
 
-public class Message {
+//Message Class which provides the core elements and details of a message.
+public class Message { 
 	
 	private int messageId;
 	private int sectionId;
@@ -8,7 +9,7 @@ public class Message {
 	private String message;
 	private String date;
 	private String sender;
-	public Message(int messageId,int sectionId,String title,String message,String date,String sender) {
+	public Message(int messageId,int sectionId,String title,String message,String date,String sender) { // Message Constructor.
 		this.messageId=messageId;
 		this.sectionId=sectionId;
 		this.title=title;
@@ -16,6 +17,8 @@ public class Message {
 		this.date=date;
 		this.setSender(sender);
 	}
+	
+	//Setters and Getters.
 	
 	public int getMessageId() {
 		return messageId;

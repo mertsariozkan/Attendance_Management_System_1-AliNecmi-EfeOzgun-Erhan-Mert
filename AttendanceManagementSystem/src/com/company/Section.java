@@ -2,21 +2,24 @@ package com.company;
 
 import java.util.ArrayList;
 
+//Section Class which provides the core elements and details of a section.
 public class Section {
     private int sectionId;
     private int lectureId;
     private Lecturer lecturer;
     private Lecture lecture;
     private String date;
-    private ArrayList<Student> students;
+    private ArrayList<Student> students; 
 
-    public Section(int sectionId, int lectureId, Lecturer lecturer, String date) {
+    public Section(int sectionId, int lectureId, Lecturer lecturer, String date) { //Section Constructor.
         this.sectionId = sectionId;
         this.lectureId = lectureId;
         this.lecturer = lecturer;
         this.date = date;
     }
-
+    
+    //Setters and Getters.
+    
     public int getSectionId() {
         return sectionId;
     }
@@ -49,7 +52,7 @@ public class Section {
         this.date = date;
     }
 
-    public ArrayList<Student> getStudents() {
+    public ArrayList<Student> getStudents() { //Students which are bound to that specific section.
         DatabaseOperations db = new DatabaseOperations();
         students = db.getStudentsOfSection(this);
         return students;
