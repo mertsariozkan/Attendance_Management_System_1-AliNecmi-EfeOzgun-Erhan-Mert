@@ -1,1 +1,0 @@
-# Attendance_Management_System_1-AliNecmi-EfeOzgun-Erhan-Mert
