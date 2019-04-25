@@ -23,6 +23,8 @@ public class LoginScreen extends JFrame {
         setResizable(false);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLayout(null);
+     // center the jframe on screen
+        setLocationRelativeTo(null);
 
         DatabaseOperations db = new DatabaseOperations();
 

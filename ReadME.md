@@ -8,7 +8,7 @@ Attendance Management System is a software which is developed in order to be use
 
   - Mark Attendance / Check Attendance
   - Send Message / Check Message
-  - Check Fee Status / Check Grade
+  - Databases of Students, Sections, Lecturers, Students, etc. 
 
 ### Group Members
 
@@ -16,6 +16,16 @@ Attendance Management System is a software which is developed in order to be use
   - Erhan Şahan
   - Mert Sarıözkan
   - Efe Gacar
+  
+### Installation Guide
+[Download] 
+  > 1. Download the executable jar file to your desktop from the download link provided above.
+  > 2. Open your PackageExplorer. (Eclipse IDE)
+  > 3. AttendanceManagementSystem --> Right Click --> Build Path --> Configure Build Path
+  > 4. Click on the current .jar --> Remove 
+  > 5. Click to Modulepath --> Add External JARs --> Find the jar file that you have downloaded. 
+  > 6. Apply & Close
+  > 7. Run Main.
 
 ### Todos
 
@@ -27,7 +37,7 @@ Attendance Management System is a software which is developed in order to be use
 
 [//]: # (These are reference links used in the body of this note and get stripped out when the markdown processor does its job. There is no need to format nicely because it shouldn't be seen. Thanks SO - http://stackoverflow.com/questions/4823468/store-comments-in-markdown-syntax)
 
-
+   [Download]: <https://bitbucket.org/xerial/sqlite-jdbc/downloads/sqlite-jdbc-3.27.2.1.jar>
    [dill]: <https://github.com/joemccann/dillinger>
    [git-repo-url]: <https://github.com/joemccann/dillinger.git>
    [john gruber]: <http://daringfireball.net>
