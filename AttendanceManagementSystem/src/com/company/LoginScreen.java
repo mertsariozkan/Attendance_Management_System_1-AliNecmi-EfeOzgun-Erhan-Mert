@@ -23,6 +23,10 @@ public class LoginScreen extends JFrame {
         setResizable(false);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLayout(null);
+     // center the jframe on screen
+        setLocationRelativeTo(null);
+
+        DatabaseOperations db = new DatabaseOperations();
 
         JLabel label = new JLabel("Attendance Management System");
         label.setBounds(50,20,300,100);
@@ -41,22 +45,25 @@ public class LoginScreen extends JFrame {
         JButton loginButton = new JButton("Login");
         loginButton.setBounds(getSize().width/3,200,100,50);
         loginButton.addActionListener(e -> {
-            switch (userType) {
-                case "Student":
-                    //Student login
-                	setVisible(false);
-                	new StudentConsole();
-                    break;
-                case "Lecturer":
-                    //Lecturer login
-                    setVisible(false);
-                    new LecturerConsole();
-                    break;
-                case "Admin":
-                    //Admin login
-                    break;
-                 
+            if(db.isUserExist(userType,idField.getText(),passwordField.getText())) {
+                setVisible(false);
+                switch (userType) {
+                    case "Student":
+                        //Student login
+                        new StudentConsole(new Student(Integer.parseInt(idField.getText())));
+                        break;
+                    case "Lecturer":
+                        //Lecturer login
+                        new LecturerConsole(new Lecturer(Integer.parseInt(idField.getText())));
+                        break;
+                    case "Admin":
+                        //Admin login
+                        break;
+                }
+            } else {
+                JOptionPane.showMessageDialog(this,"Your information is incorrect.","Warning",JOptionPane.WARNING_MESSAGE);
             }
+
         });
 
 
