@@ -19,7 +19,7 @@ Attendance Management System is a software which is developed in order to be use
   
 ### Installation Guide
 [Download] 
-  > 1. Download the excutable jar file to your desktop from the download link provided above.
+  > 1. Download the executable jar file to your desktop from the download link provided above.
   > 2. Open your PackageExplorer. (Eclipse IDE)
   > 3. AttendanceManagementSystem --> Right Click --> Build Path --> Configure Build Path
   > 4. Click on the current .jar --> Remove 
