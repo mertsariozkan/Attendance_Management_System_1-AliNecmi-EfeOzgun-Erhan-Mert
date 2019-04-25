@@ -122,18 +122,19 @@ public class StudentConsole extends JFrame {
         checkAttendanceButton.setToolTipText("Check Attendances");
         checkAttendanceButton.addActionListener(e -> {
             rightPanel.removeAll();
-            String[][] courseName = {
-                    { "SE 311"},
-                    { "SE 375"},
-                    { "CE 303"}
-            };
+            ArrayList<Lecture> lectures = db.getLectureNames(student.getId());
+            String[][] courseName = new String[lectures.size()][1];
+            for (int i = 0; i < lectures.size(); i++) {
+            	courseName[i][0] = lectures.get(i).getName();
+            }
+            
             String[] columnNames = { "Lectures"};
             JTable attendanceTable = new JTable(courseName, columnNames) {
                 @Override
                 public boolean isCellEditable(int row, int column) {
                     return false;
                 }
-            };
+            };    
             attendanceTable.setRowHeight(20);
             attendanceTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
             attendanceTable.getColumnModel().getColumn(0).setMinWidth(rightPanel.getWidth());
@@ -143,22 +144,32 @@ public class StudentConsole extends JFrame {
             JButton DetailedAttendanceButton = new JButton("Detailed Attendance");
             DetailedAttendanceButton.setBounds(5,rightPanel.getHeight()-70,175,30);
             DetailedAttendanceButton.addActionListener(e1 -> {
-                rightPanel.removeAll();
-                JLabel attendanceTitle = new JLabel("Attendance Status: ");
-                attendanceTitle.setBounds(10,5,300,20);
+            	   rightPanel.removeAll();
+                   ArrayList<String> date = db.getAbsenteeismDates(student.getId(),lectures.get(attendanceTable.getSelectedRow()).getLectureId());
+                 //  ArrayList<String> absenteeism = db.getAbsenteeismDates(student.getId(),lectures.get(attendanceTable.getSelectedRow()).getLectureId()); This line will be change at the next update 
+                   
+                   
+                   String[][] absenteeismArray = new String[date.size()][2];
+                   for (int i = 0; i < date.size(); i++) {
+                	   absenteeismArray[i][0] = date.get(i);
+                       absenteeismArray[i][1] = null;
 
-                JTable table = new JTable(new AttendanceTableModel());
-                JScrollPane scrollPane1 = new JScrollPane(table);
-                scrollPane1.setBounds(10,25,rightPanel.getWidth()-20,rightPanel.getHeight()-100);
-
-              
-                rightPanel.add(attendanceTitle);
-                rightPanel.add(scrollPane1);
-                rightPanel.repaint();
+                   }
+                   String[] columnNames1 = {"Date ", "Absenteeism" };
+                   JTable naTable = new JTable(absenteeismArray, columnNames1);
+                   naTable.setRowHeight(20);
+                   naTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+                   naTable.getColumnModel().getColumn(0).setMinWidth(rightPanel.getWidth() / 2);
+                   naTable.getColumnModel().getColumn(1).setMinWidth(rightPanel.getWidth() / 2);
+                   JScrollPane scrollPane1 = new JScrollPane(naTable);
+                   scrollPane1.setBounds(0, 0, rightPanel.getWidth(), rightPanel.getHeight());
+                   rightPanel.add(scrollPane1);
+                   repaint();
+                   
             });
-
-            rightPanel.add(scrollPane);
             rightPanel.add(DetailedAttendanceButton);
+            rightPanel.add(scrollPane);
+        //    rightPanel.add(DetailedAttendanceButton);
             repaint();
         });
 
@@ -174,39 +185,5 @@ public class StudentConsole extends JFrame {
         setVisible(true);
     }
     
-    class AttendanceTableModel extends AbstractTableModel {
 
-    	
-    	
-    	DatabaseOperations db;
-    	
-        String[] columns = {"Date", "Lecture1" , "Lecture2" };
-        Object[][] data = {
-                {"2019/3/10", "X" , "X" },
-                {"2019/6/10", "X" , " " },
-                
-        };
-        public int getRowCount() {
-            return data.length;
-        }
-
-        public int getColumnCount() {
-            return columns.length;
-        }
-
-        public Object getValueAt(int rowIndex, int columnIndex) {
-            return data[rowIndex][columnIndex];
-        }
-        @Override
-        public String getColumnName(int column) {
-            return columns[column];
-        }
-    }
-  
-    
-    
- 
-    
 }
-
-

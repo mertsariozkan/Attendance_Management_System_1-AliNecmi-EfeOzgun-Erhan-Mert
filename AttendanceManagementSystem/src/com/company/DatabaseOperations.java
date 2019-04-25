@@ -534,6 +534,58 @@ public class DatabaseOperations {
         }
         return messages;
     }
-    
+
+public ArrayList<Lecture> getLectureNames(int studentId) {
+    	 connectToDatabase();
+    	 ArrayList<Lecture> lectureNames = new ArrayList<>();
+    	 String getCourseNamesQuery = "Select Lectures.name,Lectures.lectureId,Lectures.hours,Lectures.maxAttendance From Sections,Enrollments,Students,Lectures Where Sections.lectureId=Lectures.lectureId AND Sections.sectionId = Enrollments.sectionId AND Enrollments.studentId=Students.studentId AND Students.studentId='" +studentId  +"';";
+    	 ResultSet resultSet = getResultSet(getCourseNamesQuery);
+    	 try {
+			while(resultSet.next()) {
+				Lecture lecture = new Lecture(resultSet.getInt("lectureId"),resultSet.getString("name"),resultSet.getInt("hours"),resultSet.getInt("maxAttendance"));
+				lectureNames.add(lecture);
+			 }
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	 return lectureNames;
+    }
+
+public ArrayList<Attendance> getAttendanceList(int studentId) {
+    connectToDatabase();
+    ArrayList<Attendance> attendances = new ArrayList<>();
+    String getAttendanceQuery = "Select * from Students,Attendances Where Attendances.studentId=Students.studentId AND studentId='" +studentId  +"';";    
+    ResultSet resultSet = getResultSet(getAttendanceQuery);
+    try {
+    	 while (resultSet.next()) {
+    		 Attendance attendance = new Attendance( resultSet.getInt("id"),resultSet.getString("date"),resultSet.getInt("sectionId"),resultSet.getInt("studentId"),resultSet.getInt("hour"),resultSet.getInt("isAttend"));
+    		 attendances.add(attendance);
+         }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    } finally {
+        closeConnection();
+    }
+    return attendances;
+}
+
+public ArrayList <String> getAbsenteeismDates(int studentId,int lectureId){
+	connectToDatabase();
+	ArrayList<String> dates = new ArrayList<>();
+	String getAbsenteeismDatesQuery= "Select Attendances.date From Students,Attendances,Lectures,Sections Where Students.studentId=Attendances.studentId AND Lectures.lectureId=Sections.lectureId AND Attendances.sectionId=Sections.sectionId AND Students.studentId='" +studentId  +"'AND Lectures.lectureId='" +lectureId  +"'";
+	ResultSet resultSet = getResultSet(getAbsenteeismDatesQuery);
+	 try {
+    	 while (resultSet.next()) {
+    		 String date = resultSet.getString("date");
+    		 dates.add(date);
+         }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    } finally {
+        closeConnection();
+    }
+    return dates;
+}
 
 }
