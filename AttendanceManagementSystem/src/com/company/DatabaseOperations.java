@@ -109,9 +109,9 @@ public class DatabaseOperations {
         }
     }
 
-    public void addLecture(int lectureId, String name, String hours) {
+    public void addLecture(int lectureId, String name, String hours, int maxAttendance) {
         connectToDatabase();
-        String insertLecture = "INSERT INTO Lectures(lectureId,name,hours) VALUES ('" + lectureId + "','" + name + "','" + hours + "')";
+        String insertLecture = "INSERT INTO Lectures(lectureId,name,hours,maxAttendance) VALUES ('" + lectureId + "','" + name + "','" + hours + "','"+maxAttendance+"')";
         Statement statement;
         try {
             statement = connection.createStatement();

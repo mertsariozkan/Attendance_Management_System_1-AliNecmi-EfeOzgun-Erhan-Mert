@@ -20,6 +20,7 @@ public class LecturerConsole extends JFrame {
 
     public LecturerConsole(Lecturer lecturer) {
 
+        //Get current date info to use when we take attendance
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd");
         String currentDate = dtf.format(LocalDate.now());
 
@@ -74,7 +75,7 @@ public class LecturerConsole extends JFrame {
             else if(db.isAttendanceTaken(lecturer.getSections().get(list.getSelectedIndex()).getSectionId(),currentDate)) { // if attendance of lecture is already taken
                 JOptionPane.showMessageDialog(this, "Attendance for this section is already taken today.", "Warning", JOptionPane.WARNING_MESSAGE);
             }
-            else {
+            else { // Take attendance of current
                 JLabel dateLabel = new JLabel("Date: " + currentDate);
                 dateLabel.setBounds(10, 5, 300, 20);
 
@@ -274,7 +275,7 @@ public class LecturerConsole extends JFrame {
 
             ArrayList<Student> students = db.getStudentsOfSection(section);
 
-            data = new Object[students.size()][4];
+            data = new Object[students.size()][lecture.getHours()+2];
             for (int i = 0; i < students.size(); i++) {
                 data[i][0] = students.get(i).getId();
                 data[i][1] = students.get(i).getName();
@@ -298,7 +299,7 @@ public class LecturerConsole extends JFrame {
 
             ArrayList<Student> students = db.getStudentsOfSection(section);
 
-            data = new Object[students.size()][4];
+            data = new Object[students.size()][lecture.getHours()+2];
             for (int i = 0; i < students.size(); i++) {
                 data[i][0] = students.get(i).getId();
                 data[i][1] = students.get(i).getName();

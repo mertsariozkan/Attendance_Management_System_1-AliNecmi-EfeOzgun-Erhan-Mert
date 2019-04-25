@@ -17,6 +17,10 @@ public class Section {
         this.lecturer = lecturer;
         this.date = date;
     }
+
+    public Section(int sectionId) {
+        this.sectionId = sectionId;
+    }
     
     //Setters and Getters.
     
