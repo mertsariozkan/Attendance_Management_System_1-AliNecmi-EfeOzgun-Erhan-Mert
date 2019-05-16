@@ -1,5 +1,7 @@
 package com.company;
 
+import java.util.ArrayList;
+
 //Lecture Class which provides the core elements and details of a lecture.
 public class Lecture {
 
@@ -7,6 +9,7 @@ public class Lecture {
     private String name;
     private int hours;
     private int maxAttendance;
+    private ArrayList<Section> sections;
 
     public Lecture(int lectureId, String name, int hours, int maxAttendance) { //Lecture Constructor.
         this.lectureId = lectureId;
@@ -43,5 +46,11 @@ public class Lecture {
 
     public int getMaxAttendance() {
         return maxAttendance;
+    }
+
+    public ArrayList<Section> getSections() {
+        DatabaseOperations db = new DatabaseOperations();
+        sections = db.getSectionsOfLecture(this);
+        return sections;
     }
 }

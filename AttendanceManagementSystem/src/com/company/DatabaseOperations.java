@@ -35,7 +35,7 @@ public class DatabaseOperations {
                 + ");";
         String createStudentsTable = "CREATE TABLE IF NOT EXISTS Students (\n"
                 + " studentId integer primary key,\n"
-                + " name text not null,\n"            
+                + " name text not null,\n"
                 + " password text not null,\n"
                 + " department text not null,\n"
                 + " class integer not null\n"
@@ -95,9 +95,9 @@ public class DatabaseOperations {
         }
     }
 
-    public void addStudent(int studentId, String name, String password,String department,int class_ ) {
+    public void addStudent(int studentId, String name, String password, String department, int class_) {
         connectToDatabase();
-        String insertStudent = "INSERT INTO Students(studentId,name,password,department,class) VALUES ('" + studentId + "','" + name + "','" + password + "','"+ department +"','" + class_ + "')";
+        String insertStudent = "INSERT INTO Students(studentId,name,password,department,class) VALUES ('" + studentId + "','" + name + "','" + password + "','" + department + "','" + class_ + "')";
         Statement statement;
         try {
             statement = connection.createStatement();
@@ -111,7 +111,7 @@ public class DatabaseOperations {
 
     public void addLecture(int lectureId, String name, String hours, int maxAttendance) {
         connectToDatabase();
-        String insertLecture = "INSERT INTO Lectures(lectureId,name,hours,maxAttendance) VALUES ('" + lectureId + "','" + name + "','" + hours + "','"+maxAttendance+"')";
+        String insertLecture = "INSERT INTO Lectures(lectureId,name,hours,maxAttendance) VALUES ('" + lectureId + "','" + name + "','" + hours + "','" + maxAttendance + "')";
         Statement statement;
         try {
             statement = connection.createStatement();
@@ -123,9 +123,9 @@ public class DatabaseOperations {
         }
     }
 
-    public void addSection(int lectureId, int lecturerId, String date) {
+    public void addSection(int sectionId, int lectureId, int lecturerId, String date) {
         connectToDatabase();
-        String insertSection = "INSERT INTO Sections(lectureId,lecturerId,date) VALUES ('" + lectureId + "','" + lecturerId + "','" + date + "')";
+        String insertSection = "INSERT INTO Sections(sectionId,lectureId,lecturerId,date) VALUES ('" + sectionId + "','" + lectureId + "','" + lecturerId + "','" + date + "')";
         Statement statement;
         try {
             statement = connection.createStatement();
@@ -229,10 +229,10 @@ public class DatabaseOperations {
             }
             if (isAttendNow) {
                 //decrease attendance by 1
-                updateAttendanceOfStudent(studentId,sectionId,-1);
+                updateAttendanceOfStudent(studentId, sectionId, -1);
             } else {
                 //increase attendance by 1
-                updateAttendanceOfStudent(studentId,sectionId,1);
+                updateAttendanceOfStudent(studentId, sectionId, 1);
             }
         }
 
@@ -301,6 +301,155 @@ public class DatabaseOperations {
         return false;
     }
 
+    public ArrayList<Student> getAllStudents() {
+        connectToDatabase();
+        ArrayList<Student> students = new ArrayList<>();
+        String sqlString = "SELECT * FROM Students;";
+        ResultSet resultSet = getResultSet(sqlString);
+        try {
+            while (resultSet.next()) {
+                Student student = new Student(resultSet.getInt("studentId"), resultSet.getString("name"), resultSet.getString("password"), resultSet.getString("department"), resultSet.getInt("class"));
+                students.add(student);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            closeConnection();
+        }
+        return students;
+    }
+
+    public ArrayList<Lecturer> getAllLecturers() {
+        connectToDatabase();
+        ArrayList<Lecturer> lecturers = new ArrayList<>();
+        String sqlString = "SELECT * FROM Lecturers;";
+        ResultSet resultSet = getResultSet(sqlString);
+        try {
+            while (resultSet.next()) {
+                Lecturer lecturer = new Lecturer(resultSet.getInt("lecturerId"), resultSet.getString("name"));
+                lecturers.add(lecturer);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            closeConnection();
+        }
+        return lecturers;
+    }
+
+    public ArrayList<Lecture> getAllLectures() {
+        connectToDatabase();
+        ArrayList<Lecture> lectures = new ArrayList<>();
+        String sqlString = "SELECT * FROM Lectures;";
+        ResultSet resultSet = getResultSet(sqlString);
+        try {
+            while (resultSet.next()) {
+                Lecture lecture = new Lecture(resultSet.getInt("lectureId"), resultSet.getString("name"), resultSet.getInt("hours"), resultSet.getInt("maxAttendance"));
+                lectures.add(lecture);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            closeConnection();
+        }
+        return lectures;
+    }
+
+    public boolean deleteLecturer(Lecturer lecturer) {
+        connectToDatabase();
+        if (lecturer.getSections().isEmpty()) {
+            String sqlStr = "DELETE FROM Lecturers WHERE lecturerId='" + lecturer.getId() + "'";
+            Statement statement;
+            try {
+                statement = connection.createStatement();
+                statement.execute(sqlStr);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } finally {
+                closeConnection();
+                return true;
+            }
+        } else {
+            return false;
+        }
+
+    }
+
+    public boolean deleteStudent(Student student) {
+        connectToDatabase();
+        if (student.getSections().isEmpty()) {
+            String sqlStr = "DELETE FROM Students WHERE studentId='" + student.getId() + "'";
+            Statement statement;
+            try {
+                statement = connection.createStatement();
+                statement.execute(sqlStr);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } finally {
+                closeConnection();
+                return true;
+            }
+        } else {
+            return false;
+        }
+    }
+
+    public void deleteSection(Section section) {
+        connectToDatabase();
+        String sqlStr = "DELETE FROM Sections WHERE sectionId='" + section.getSectionId() + "'";
+        Statement statement;
+        try {
+            statement = connection.createStatement();
+            statement.execute(sqlStr);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            closeConnection();
+        }
+        connectToDatabase();
+        String sqlStr2 = "DELETE FROM Enrollments WHERE sectionId='" + section.getSectionId() + "'";
+        Statement statement2;
+        try {
+            statement2 = connection.createStatement();
+            statement2.execute(sqlStr2);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            closeConnection();
+        }
+        connectToDatabase();
+        String sqlStr3 = "DELETE FROM Attendances WHERE sectionId='" + section.getSectionId() + "'";
+        Statement statement3;
+        try {
+            statement3 = connection.createStatement();
+            statement3.execute(sqlStr3);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            closeConnection();
+        }
+
+    }
+
+    public boolean deleteLecture(Lecture lecture) {
+        connectToDatabase();
+        if (lecture.getSections().isEmpty()) {
+            String sqlStr = "DELETE FROM Lectures WHERE lectureId='" + lecture.getLectureId() + "'";
+            Statement statement;
+            try {
+                statement = connection.createStatement();
+                statement.execute(sqlStr);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } finally {
+                closeConnection();
+                return true;
+            }
+        } else {
+            return false;
+        }
+    }
+
     public ArrayList<Section> getSectionsOfLecturer(Lecturer lecturer) {
         connectToDatabase();
         ArrayList<Section> sections = new ArrayList<>();
@@ -309,6 +458,25 @@ public class DatabaseOperations {
         try {
             while (resultSet.next()) {
                 Section section = new Section(resultSet.getInt("sectionId"), resultSet.getInt("lectureId"), lecturer, resultSet.getString("date"));
+                sections.add(section);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            closeConnection();
+        }
+        return sections;
+
+    }
+
+    public ArrayList<Section> getSectionsOfLecture(Lecture lecture) {
+        connectToDatabase();
+        ArrayList<Section> sections = new ArrayList<>();
+        String sqlString = "SELECT * FROM Sections WHERE lectureId='" + lecture.getLectureId() + "';";
+        ResultSet resultSet = getResultSet(sqlString);
+        try {
+            while (resultSet.next()) {
+                Section section = new Section(resultSet.getInt("sectionId"), resultSet.getInt("lectureId"), new Lecturer(resultSet.getInt("lecturerId")), resultSet.getString("date"));
                 sections.add(section);
             }
         } catch (SQLException e) {
@@ -364,7 +532,7 @@ public class DatabaseOperations {
         ResultSet resultSet = getResultSet(sqlString);
         try {
             if (resultSet.next()) {
-                return new Student(resultSet.getInt("studentId"), resultSet.getString("name"), resultSet.getString("password"),resultSet.getString("department"),resultSet.getInt("class"));
+                return new Student(resultSet.getInt("studentId"), resultSet.getString("name"), resultSet.getString("password"), resultSet.getString("department"), resultSet.getInt("class"));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -468,9 +636,8 @@ public class DatabaseOperations {
         }
         return null;
     }
-    
-    
-    
+
+
     public String getStudentName(int studentId) {
         connectToDatabase();
         String sqlString = "SELECT name FROM Students WHERE studentId='" + studentId + "';";
@@ -486,6 +653,7 @@ public class DatabaseOperations {
         }
         return null;
     }
+
     public String getStudentDepartment(int studentId) {
         connectToDatabase();
         String sqlString = "SELECT department FROM Students WHERE studentId='" + studentId + "';";
@@ -501,6 +669,7 @@ public class DatabaseOperations {
         }
         return null;
     }
+
     public String getStudentClass(int studentId) {
         connectToDatabase();
         String sqlString = "SELECT class FROM Students WHERE studentId='" + studentId + "';";
@@ -516,17 +685,17 @@ public class DatabaseOperations {
         }
         return null;
     }
-    
+
     public ArrayList<Message> getMessage(int studentId) {
         connectToDatabase();
         ArrayList<Message> messages = new ArrayList<>();
-        String getMessageTitleQuery = "Select Messages.id,Messages.sectionId,Messages.message,Messages.title,Messages.date,Lecturers.name From Messages,Enrollments,Students,Sections,Lecturers where Enrollments.sectionId = Messages.sectionId AND Enrollments.sectionID = Sections.sectionId AND Sections.lectureId = Lecturers.lecturerId AND Enrollments.studentId = Students.studentId AND Students.studentId='" +studentId  +"';";    
+        String getMessageTitleQuery = "Select Messages.id,Messages.sectionId,Messages.message,Messages.title,Messages.date,Lecturers.name From Messages,Enrollments,Students,Sections,Lecturers where Enrollments.sectionId = Messages.sectionId AND Enrollments.sectionID = Sections.sectionId AND Sections.lectureId = Lecturers.lecturerId AND Enrollments.studentId = Students.studentId AND Students.studentId='" + studentId + "';";
         ResultSet resultSet = getResultSet(getMessageTitleQuery);
         try {
-        	 while (resultSet.next()) {
-        		 Message message = new Message(resultSet.getInt("id"), resultSet.getInt("sectionId"), resultSet.getString("title"),resultSet.getString("message"),resultSet.getString("date"),resultSet.getString("name"));
-        		 messages.add(message);
-             }
+            while (resultSet.next()) {
+                Message message = new Message(resultSet.getInt("id"), resultSet.getInt("sectionId"), resultSet.getString("title"), resultSet.getString("message"), resultSet.getString("date"), resultSet.getString("name"));
+                messages.add(message);
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -535,57 +704,57 @@ public class DatabaseOperations {
         return messages;
     }
 
-public ArrayList<Lecture> getLectureNames(int studentId) {
-    	 connectToDatabase();
-    	 ArrayList<Lecture> lectureNames = new ArrayList<>();
-    	 String getCourseNamesQuery = "Select Lectures.name,Lectures.lectureId,Lectures.hours,Lectures.maxAttendance From Sections,Enrollments,Students,Lectures Where Sections.lectureId=Lectures.lectureId AND Sections.sectionId = Enrollments.sectionId AND Enrollments.studentId=Students.studentId AND Students.studentId='" +studentId  +"';";
-    	 ResultSet resultSet = getResultSet(getCourseNamesQuery);
-    	 try {
-			while(resultSet.next()) {
-				Lecture lecture = new Lecture(resultSet.getInt("lectureId"),resultSet.getString("name"),resultSet.getInt("hours"),resultSet.getInt("maxAttendance"));
-				lectureNames.add(lecture);
-			 }
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-    	 return lectureNames;
+    public ArrayList<Lecture> getLectureNames(int studentId) {
+        connectToDatabase();
+        ArrayList<Lecture> lectureNames = new ArrayList<>();
+        String getCourseNamesQuery = "Select Lectures.name,Lectures.lectureId,Lectures.hours,Lectures.maxAttendance From Sections,Enrollments,Students,Lectures Where Sections.lectureId=Lectures.lectureId AND Sections.sectionId = Enrollments.sectionId AND Enrollments.studentId=Students.studentId AND Students.studentId='" + studentId + "';";
+        ResultSet resultSet = getResultSet(getCourseNamesQuery);
+        try {
+            while (resultSet.next()) {
+                Lecture lecture = new Lecture(resultSet.getInt("lectureId"), resultSet.getString("name"), resultSet.getInt("hours"), resultSet.getInt("maxAttendance"));
+                lectureNames.add(lecture);
+            }
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return lectureNames;
     }
 
-public ArrayList<Attendance> getAttendanceList(int studentId) {
-    connectToDatabase();
-    ArrayList<Attendance> attendances = new ArrayList<>();
-    String getAttendanceQuery = "Select * from Students,Attendances Where Attendances.studentId=Students.studentId AND studentId='" +studentId  +"';";    
-    ResultSet resultSet = getResultSet(getAttendanceQuery);
-    try {
-    	 while (resultSet.next()) {
-    		 Attendance attendance = new Attendance( resultSet.getInt("id"),resultSet.getString("date"),resultSet.getInt("sectionId"),resultSet.getInt("studentId"),resultSet.getInt("hour"),resultSet.getInt("isAttend"));
-    		 attendances.add(attendance);
-         }
-    } catch (SQLException e) {
-        e.printStackTrace();
-    } finally {
-        closeConnection();
+    public ArrayList<Attendance> getAttendanceList(int studentId) {
+        connectToDatabase();
+        ArrayList<Attendance> attendances = new ArrayList<>();
+        String getAttendanceQuery = "Select * from Students,Attendances Where Attendances.studentId=Students.studentId AND studentId='" + studentId + "';";
+        ResultSet resultSet = getResultSet(getAttendanceQuery);
+        try {
+            while (resultSet.next()) {
+                Attendance attendance = new Attendance(resultSet.getInt("id"), resultSet.getString("date"), resultSet.getInt("sectionId"), resultSet.getInt("studentId"), resultSet.getInt("hour"), resultSet.getInt("isAttend"));
+                attendances.add(attendance);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            closeConnection();
+        }
+        return attendances;
     }
-    return attendances;
-}
 
-public ArrayList <String> getAbsenteeismDates(int studentId,int lectureId){
-	connectToDatabase();
-	ArrayList<String> dates = new ArrayList<>();
-	String getAbsenteeismDatesQuery= "Select Attendances.date From Students,Attendances,Lectures,Sections Where Students.studentId=Attendances.studentId AND Lectures.lectureId=Sections.lectureId AND Attendances.sectionId=Sections.sectionId AND Students.studentId='" +studentId  +"'AND Lectures.lectureId='" +lectureId  +"'";
-	ResultSet resultSet = getResultSet(getAbsenteeismDatesQuery);
-	 try {
-    	 while (resultSet.next()) {
-    		 String date = resultSet.getString("date");
-    		 dates.add(date);
-         }
-    } catch (SQLException e) {
-        e.printStackTrace();
-    } finally {
-        closeConnection();
+    public ArrayList<String> getAbsenteeismDates(int studentId, int lectureId) {
+        connectToDatabase();
+        ArrayList<String> dates = new ArrayList<>();
+        String getAbsenteeismDatesQuery = "Select Attendances.date From Students,Attendances,Lectures,Sections Where Students.studentId=Attendances.studentId AND Lectures.lectureId=Sections.lectureId AND Attendances.sectionId=Sections.sectionId AND Students.studentId='" + studentId + "'AND Lectures.lectureId='" + lectureId + "'";
+        ResultSet resultSet = getResultSet(getAbsenteeismDatesQuery);
+        try {
+            while (resultSet.next()) {
+                String date = resultSet.getString("date");
+                dates.add(date);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            closeConnection();
+        }
+        return dates;
     }
-    return dates;
-}
 
 }
