@@ -721,22 +721,35 @@ public class DatabaseOperations {
         return lectureNames;
     }
 
-    public ArrayList<Attendance> getAttendanceList(int studentId) {
+    public Attendance getAttendanceList(int studentId,int sectionId) {
         connectToDatabase();
-        ArrayList<Attendance> attendances = new ArrayList<>();
-        String getAttendanceQuery = "Select * from Students,Attendances Where Attendances.studentId=Students.studentId AND studentId='" + studentId + "';";
+        ArrayList<String> dates = new ArrayList<>();
+        ArrayList<Integer> hours = new ArrayList<>();
+
+        String getAttendanceQuery = "Select * from Attendances Where studentId="+studentId+" AND sectionId='" + sectionId + "' AND isAttend=0;";
         ResultSet resultSet = getResultSet(getAttendanceQuery);
+        boolean isExists = false;
         try {
             while (resultSet.next()) {
-                Attendance attendance = new Attendance(resultSet.getInt("id"), resultSet.getString("date"), resultSet.getInt("sectionId"), resultSet.getInt("studentId"), resultSet.getInt("hour"), resultSet.getInt("isAttend"));
-                attendances.add(attendance);
+                for(int i=0;i<dates.size();i++) {
+                    if(dates.get(i).equals(resultSet.getString("date"))) {
+                        hours.set(i,hours.get(i)+1);
+                        isExists = true;
+                    }
+                }
+                if(!isExists) {
+                    dates.add(resultSet.getString("date"));
+                    hours.add(1);
+                }
+                isExists = false;
+
             }
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
             closeConnection();
         }
-        return attendances;
+        return new Attendance(dates,hours);
     }
 
     public ArrayList<String> getAbsenteeismDates(int studentId, int lectureId) {

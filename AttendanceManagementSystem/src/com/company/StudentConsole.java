@@ -9,6 +9,7 @@ import java.awt.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 
 /**
@@ -122,10 +123,10 @@ public class StudentConsole extends JFrame {
         checkAttendanceButton.setToolTipText("Check Attendances");
         checkAttendanceButton.addActionListener(e -> {
             rightPanel.removeAll();
-            ArrayList<Lecture> lectures = db.getLectureNames(student.getId());
-            String[][] courseName = new String[lectures.size()][1];
-            for (int i = 0; i < lectures.size(); i++) {
-            	courseName[i][0] = lectures.get(i).getName();
+            ArrayList<Section> sections1 = db.getSectionsOfStudent(student);
+            String[][] courseName = new String[sections1.size()][1];
+            for (int i = 0; i < sections1.size(); i++) {
+            	courseName[i][0] = sections1.get(i).getLecture().getName();
             }
             
             String[] columnNames = { "Lectures"};
@@ -145,16 +146,14 @@ public class StudentConsole extends JFrame {
             DetailedAttendanceButton.setBounds(5,rightPanel.getHeight()-70,175,30);
             DetailedAttendanceButton.addActionListener(e1 -> {
             	   rightPanel.removeAll();
-                   ArrayList<String> date = db.getAbsenteeismDates(student.getId(),lectures.get(attendanceTable.getSelectedRow()).getLectureId());
-                 //  ArrayList<String> absenteeism = db.getAbsenteeismDates(student.getId(),lectures.get(attendanceTable.getSelectedRow()).getLectureId()); This line will be change at the next update 
-                   
-                   
-                   String[][] absenteeismArray = new String[date.size()][2];
-                   for (int i = 0; i < date.size(); i++) {
-                	   absenteeismArray[i][0] = date.get(i);
-                       absenteeismArray[i][1] = null;
+            	   Attendance attendance = db.getAttendanceList(student.getId(),sections1.get(attendanceTable.getSelectedRow()).getSectionId());
+                   String[][] absenteeismArray = new String[attendance.getDates().size()][2];
+                   for (int i = 0; i < attendance.getDates().size(); i++) {
+                	   absenteeismArray[i][0] = attendance.getDates().get(i);
+                       absenteeismArray[i][1] = String.valueOf(attendance.getHours().get(i));
 
                    }
+
                    String[] columnNames1 = {"Date ", "Absenteeism" };
                    JTable naTable = new JTable(absenteeismArray, columnNames1);
                    naTable.setRowHeight(20);
