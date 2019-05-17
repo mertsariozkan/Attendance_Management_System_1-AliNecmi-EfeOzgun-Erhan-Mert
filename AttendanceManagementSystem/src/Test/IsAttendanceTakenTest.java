@@ -16,7 +16,7 @@ public class IsAttendanceTakenTest {
 
     @Test
     public void testIsAttendanceTaken() {
-        Assert.assertTrue(db.isAttendanceTaken(2,"2019/04/25"));
-        Assert.assertFalse(db.isAttendanceTaken(2,"2019/04/24"));
+        Assert.assertTrue(db.isAttendanceTaken(1,"2019/05/17"));
+        Assert.assertFalse(db.isAttendanceTaken(1,"2019/04/24"));
     }
 }
