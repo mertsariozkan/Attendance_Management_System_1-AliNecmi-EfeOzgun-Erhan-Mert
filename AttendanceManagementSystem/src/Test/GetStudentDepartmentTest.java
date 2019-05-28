@@ -17,6 +17,6 @@ public class GetStudentDepartmentTest {
     @Test
     public void testGetStudentDepartment() {
         Assert.assertNotNull(db.getStudentDepartment(1));
-        Assert.assertEquals("Software Engineering",db.getStudentDepartment(1));
+        Assert.assertEquals("Software Engineering",db.getStudentDepartment(2));
     }
 }

@@ -17,6 +17,6 @@ public class GetStudentNameTest {
     @Test
     public void testGetStudentName() {
         Assert.assertNotNull(db.getStudentName(1));
-        Assert.assertEquals("Mert SarÄ±Ã¶zkan",db.getStudentName(1));
+        Assert.assertEquals("Mert Sarıözkan",db.getStudentName(2));
     }
 }

@@ -12,6 +12,10 @@ public class Lecturer {
     public Lecturer(int id) { //Lecturer Constructor.
         this.id = id;
     }
+    public Lecturer(int id, String name) {
+        this.id = id;
+        this.name = name;
+    }
 
     //Setters and Getters.
     

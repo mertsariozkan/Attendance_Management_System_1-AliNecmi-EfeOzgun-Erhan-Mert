@@ -17,7 +17,7 @@ public class IsStudentAttendedTest {
 
     @Test
     public void testIsStudentAttended() {
-        Assert.assertTrue(db.isStudentAttendedAt(1,2,"2019/04/25",1));
+        Assert.assertTrue(db.isStudentAttendedAt(1,1,"2019/05/17",1));
         Assert.assertFalse(db.isStudentAttendedAt(1,2,"2019/04/25",3));
     }
 }

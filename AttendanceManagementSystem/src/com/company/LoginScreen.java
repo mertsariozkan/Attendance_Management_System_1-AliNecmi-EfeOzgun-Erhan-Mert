@@ -58,6 +58,7 @@ public class LoginScreen extends JFrame {
                         break;
                     case "Admin":
                         //Admin login
+                        new AdminConsole();
                         break;
                 }
             } else {
